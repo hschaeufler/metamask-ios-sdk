@@ -10,9 +10,15 @@ import Combine
 public struct RequestError: Codable, Error {
     public let code: Int
     public let message: String
+    public let data: RequestErrorData?
 
     public init(from info: [String: Any]) {
         code = info["code"] as? Int ?? -1
+        if let dataInfo = (info["data"] as? [String: Any]) {
+            data = RequestErrorData(from: dataInfo)
+        } else {
+            data = nil
+        }
         message = info["message"] as? String ?? ErrorType(rawValue: code)?.message ?? ""
     }
 
@@ -61,5 +67,29 @@ public struct RequestError: Codable, Error {
 public extension RequestError {
     var codeType: ErrorType {
         ErrorType(rawValue: code) ?? .unknownError
+    }
+}
+
+public struct RequestErrorData: Codable  {
+    public var message: String?
+    public var data: ErrorData?
+    
+    public init(from info: [String: Any]) {
+        message = info["message"] as? String
+        if let dataInfo = (info["data"] as? [String: Any]) {
+            data = ErrorData(from: dataInfo)
+        } else {
+            data = nil
+        }
+    }
+}
+
+public struct ErrorData: Codable  {
+    public var message: String?
+    public var data: String?
+    
+    public init(from info: [String: Any]) {
+        message = info["message"] as? String
+        data = info["data"] as? String
     }
 }
